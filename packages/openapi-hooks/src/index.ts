@@ -99,7 +99,20 @@ export type ApiRequestBody<TBody extends AnyRequestBody | undefined> =
 
 export type OpenApiHookOptions = {
     baseUrl: URL | string;
+    onError?: (error: ApiError) => void;
 };
+
+
+export class ApiError extends Error {
+    // eslint-disable-next-line unused-imports/no-unused-vars
+    constructor(message: string, public status: number) {
+        super(message);
+    }
+
+    static fromResponse(response: Response) {
+        return new ApiError(response.statusText, response.status);
+    }
+}
 
 const convertBody = (
     data: any,
@@ -147,7 +160,7 @@ const decodeResponse = async (response, responseContentType) => {
 };
 
 export const setupOpenApi = <paths extends Paths>(options?: OpenApiHookOptions) => {
-    const { baseUrl = window.location.toString() } = options ?? {};
+    const { baseUrl = window.location.toString(), onError } = options ?? {};
 
     return async <
         TPath extends keyof paths,
@@ -205,9 +218,10 @@ export const setupOpenApi = <paths extends Paths>(options?: OpenApiHookOptions) 
             ...fetchOptions,
         });
 
-        console.log(response);
-
-        // error handling here
+        if (!response.ok) {
+            onError?.(ApiError.fromResponse(response));
+            throw ApiError.fromResponse(response);
+        }
 
         const responseContentType = response.headers.get('content-type');
 
