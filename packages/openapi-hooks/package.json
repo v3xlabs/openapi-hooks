@@ -1,9 +1,13 @@
 {
   "name": "openapi-hooks",
-  "version": "0.0.3",
+  "version": "0.0.3-alpha.3",
   "description": "Magical fetch inference for OpenAPI with React Query support",
   "main": "./dist/index.js",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/v3xlabs/openapi-hooks.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsup src/index.ts",
