@@ -99,6 +99,7 @@ export type ApiRequestBody<TBody extends AnyRequestBody | undefined> =
 
 export type OpenApiHookOptions = {
     baseUrl: URL | string;
+    headers?: Record<string, string>;
     onError?: (error: ApiError) => void;
 };
 
@@ -159,7 +160,7 @@ const decodeResponse = async (response, responseContentType) => {
 };
 
 export const createFetch = <paths extends Paths>(options?: OpenApiHookOptions) => {
-    const { baseUrl = window.location.toString(), onError } = options ?? {};
+    const { baseUrl = window.location.toString(), headers: defaultHeaders, onError } = options ?? {};
 
     /**
      * Makes a type-safe OpenAPI request using fetch
@@ -282,6 +283,16 @@ export const createFetch = <paths extends Paths>(options?: OpenApiHookOptions) =
         }
 
         const headers = new Headers();
+
+        if (defaultHeaders) {
+            for (const [key, value] of Object.entries(defaultHeaders)) {
+                headers.set(key, value);
+            }
+        }
+
+        if (contentType) {
+            headers.set('Content-Type', contentType);
+        }
 
         if (header) {
             for (const [key, value] of Object.entries(header)) {

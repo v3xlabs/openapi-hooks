@@ -39,15 +39,15 @@ console.log(response.data);
 ```tsx
 import { useQuery } from "@tanstack/react-query";
 
-export const getTodos = async () => {
-    const response = await fetching("/todos", "get", {});
-
-    return response.data;
-};
-
-export const useTodos = () =>
-    useQuery({
+export const getTodos = () =>
+    queryOptions({
         queryKey: ["todos"],
-        queryFn: () => getTodos(),
+        queryFn: async () => {
+            const response = await fetching("/todos", "get", {});
+
+            return response.data;
+        },
     });
+
+export const useTodos = () => useQuery(getTodos());
 ```
