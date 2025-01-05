@@ -1,0 +1,20 @@
+{
+  "name": "openapi-hooks",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "openapi",
+    "openapi-typescript",
+    "typescript",
+    "react",
+    "react-query",
+    "@tanstack/react-query"
+  ],
+  "author": "V3X Labs",
+  "license": "GPL-3.0-only"
+}
