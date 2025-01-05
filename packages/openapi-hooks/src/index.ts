@@ -102,7 +102,6 @@ export type OpenApiHookOptions = {
     onError?: (error: ApiError) => void;
 };
 
-
 export class ApiError extends Error {
     // eslint-disable-next-line unused-imports/no-unused-vars
     constructor(message: string, public status: number) {
@@ -159,14 +158,96 @@ const decodeResponse = async (response, responseContentType) => {
     }
 };
 
-export const setupOpenApi = <paths extends Paths>(options?: OpenApiHookOptions) => {
+export const createFetch = <paths extends Paths>(options?: OpenApiHookOptions) => {
     const { baseUrl = window.location.toString(), onError } = options ?? {};
 
+    /**
+     * Makes a type-safe OpenAPI request using fetch
+     *
+     * @description
+     * This function provides a strongly-typed interface for making API requests based on your OpenAPI schema.
+     * It handles authentication, request/response serialization, and error handling automatically.
+     *
+     * @example
+     * Basic GET request:
+     * ```ts
+     * const response = await fetching('/items', 'get', {
+     *   query: { limit: 10, offset: 0 }
+     * });
+     * // response.data is fully typed based on your API schema! 🎉
+     * console.log(response.data.items);
+     * ```
+     *
+     * @example
+     * POST request with JSON body:
+     * ```ts
+     * const response = await fetching('/items', 'post', {
+     *   contentType: 'application/json',
+     *   data: {
+     *     name: 'Cool Item',
+     *     description: 'A very cool item indeed'
+     *   }
+     * });
+     * ```
+     *
+     * @example
+     * Using path parameters:
+     * ```ts
+     * const response = await fetching('/items/{itemId}', 'get', {
+     *   path: { itemId: '123' }
+     * });
+     * ```
+     *
+     * @example
+     * Adding custom headers:
+     * ```ts
+     * const response = await fetching('/items', 'get', {
+     *   header: {
+     *     'X-Custom-Header': 'value'
+     *   }
+     * });
+     * ```
+     *
+     * @example
+     * Handling errors:
+     * ```ts
+     * try {
+     *   const response = await fetching('/items', 'get', {});
+     * } catch (error) {
+     *   if (error instanceof ApiError) {
+     *     console.error(`API Error ${error.status}: ${error.message}`);
+     *   }
+     * }
+     * ```
+     *
+     * @template TPath - The API endpoint path (must exist in your OpenAPI schema)
+     * @template TMethod - The HTTP method to use (must be valid for the given path)
+     * @template TOptions - Request options including query params, headers, and body
+     * @template TRoute - Internal type representing the full route definition
+     *
+     * @param path - The API endpoint path (e.g., '/items')
+     * @param method - The HTTP method to use (e.g., 'get', 'post')
+     * @param options - Request configuration object containing:
+     *   - query?: Record<string, any> - Query parameters
+     *   - header?: Record<string, any> - Custom headers
+     *   - path?: Record<string, any> - Path parameters
+     *   - contentType?: string - Request content type
+     *   - data?: any - Request body
+     *   - fetchOptions?: RequestInit - Additional fetch options
+     *
+     * @returns A Promise resolving to a typed response object containing:
+     *   - status: HTTP status code
+     *   - contentType: Response content type (if applicable)
+     *   - data: Response body (if applicable)
+     *   - headers: Response headers
+     *
+     * @throws {ApiError} When the server returns a non-2xx status code
+     * @throws {Error} When an unsupported content type is encountered
+     */
     return async <
         TPath extends keyof paths,
         TMethod extends PathMethods<paths, TPath>,
-        TOptions extends TRoute['parameters'] &
-        ApiRequestBody<TRoute['requestBody']> & {
+        TOptions extends TRoute['parameters'] & ApiRequestBody<TRoute['requestBody']> & {
             fetchOptions?: RequestInit;
         },
         TRoute extends AnyRoute = paths[TPath][TMethod] extends AnyRoute
@@ -192,7 +273,7 @@ export const setupOpenApi = <paths extends Paths>(options?: OpenApiHookOptions) 
             }
         }
 
-        const url = new URL(path.toString(), baseUrl);
+        const url = new URL(`.${path.toString()}`, baseUrl);
 
         if (query) {
             for (const [key, value] of Object.entries(query)) {
@@ -208,9 +289,6 @@ export const setupOpenApi = <paths extends Paths>(options?: OpenApiHookOptions) 
             }
         }
 
-        // TODO: Introduce Middlewares here
-
-        // The fetch request
         const response = await fetch(url, {
             method: method.toUpperCase(),
             headers,

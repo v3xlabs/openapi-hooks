@@ -1,7 +1,7 @@
-import { setupOpenApi } from "openapi-hooks";
+import { createFetch } from "openapi-hooks";
 import { paths } from "./schema.gen";
 
-const fetching = setupOpenApi<paths>();
+const fetching = createFetch<paths>();
 
 const response = await fetching('/site/{site_id}', 'get', {
     path: {
