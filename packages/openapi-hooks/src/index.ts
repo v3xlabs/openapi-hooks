@@ -84,7 +84,7 @@ export type ApiResponse<TResponses extends AnyResponses> = {
     : never;
 }[keyof TResponses];
 
-export type ApiRequestBody<TBody extends AnyRequestBody | undefined> =
+export type ApiRequestBody<TBody extends AnyRequestBody | never> =
     TBody extends AnyRequestBody
     ? {
         [K in keyof TBody['content']]: {
@@ -278,6 +278,8 @@ export const createFetch = <paths extends Paths>(options?: OpenApiHookOptions) =
 
         if (query) {
             for (const [key, value] of Object.entries(query)) {
+                if (!value) continue;
+
                 url.searchParams.set(key, value.toString());
             }
         }
