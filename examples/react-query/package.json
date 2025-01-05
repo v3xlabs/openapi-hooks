@@ -1,0 +1,27 @@
+{
+    "name": "react-query",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "vite",
+        "build": "vite build",
+        "api-schema": "openapi-typescript http://localhost:3000/openapi.json -t -o ./src/api/schema.gen.ts"
+    },
+    "keywords": [],
+    "author": "V3X Labs",
+    "license": "GPL-3.0-only",
+    "dependencies": {
+        "@tanstack/react-query": "^5.62.15",
+        "@tanstack/router-plugin": "^1.95.1",
+        "@types/react": "^19.0.2",
+        "@types/react-dom": "^19.0.2",
+        "@vitejs/plugin-react": "^4.3.4",
+        "openapi-hooks": "workspace:^",
+        "openapi-typescript": "^7.5.1",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "vite": "^6.0.7"
+    }
+}

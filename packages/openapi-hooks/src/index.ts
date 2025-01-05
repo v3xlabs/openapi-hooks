@@ -101,12 +101,10 @@ export type OpenApiHookOptions = {
     baseUrl: URL | string;
 };
 
-
 const convertBody = (
     data: any,
     contentType: string | undefined
-): // eslint-disable-next-line no-undef
-    BodyInit | undefined => {
+): BodyInit | undefined => {
     if (contentType === undefined) {
         return;
     }
@@ -206,6 +204,8 @@ export const setupOpenApi = <paths extends Paths>(options?: OpenApiHookOptions) 
             body: convertBody(data, contentType),
             ...fetchOptions,
         });
+
+        console.log(response);
 
         // error handling here
 
