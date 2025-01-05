@@ -1,0 +1,3 @@
+packages:
+  - packages/openapi-hooks
+  - examples/basic
