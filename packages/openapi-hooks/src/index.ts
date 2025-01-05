@@ -84,7 +84,7 @@ export type ApiResponse<TResponses extends AnyResponses> = {
     : never;
 }[keyof TResponses];
 
-export type ApiRequestBody<TBody extends AnyRequestBody | never> =
+export type ApiRequestBody<TBody extends AnyRequestBody | undefined> =
     TBody extends AnyRequestBody
     ? {
         [K in keyof TBody['content']]: {
@@ -253,7 +253,7 @@ export const createFetch = <paths extends Paths>(options?: OpenApiHookOptions) =
         },
         TRoute extends AnyRoute = paths[TPath][TMethod] extends AnyRoute
         ? paths[TPath][TMethod]
-        : never
+        : never,
     >(
         path: TPath,
         method: TMethod,
