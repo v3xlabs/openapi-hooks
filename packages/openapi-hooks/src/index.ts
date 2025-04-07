@@ -97,9 +97,12 @@ export type ApiRequestBody<TBody extends AnyRequestBody | undefined> =
         data?: undefined;
     };
 
+export type HeaderObject = Record<string, string>;
+export type HeaderPredicate = () => PromiseLike<HeaderObject>;
+
 export type OpenApiHookOptions = {
     baseUrl: URL | string;
-    headers?: Record<string, string>;
+    headers?: HeaderObject | HeaderPredicate;
     onError?: (error: ApiError) => void;
 };
 
@@ -287,7 +290,9 @@ export const createFetch = <paths extends Paths>(options?: OpenApiHookOptions) =
         const headers = new Headers();
 
         if (defaultHeaders) {
-            for (const [key, value] of Object.entries(defaultHeaders)) {
+            let addDefaultHeaders = typeof defaultHeaders === 'function' ? await defaultHeaders() : defaultHeaders;
+
+            for (const [key, value] of Object.entries(addDefaultHeaders)) {
                 headers.set(key, value);
             }
         }
