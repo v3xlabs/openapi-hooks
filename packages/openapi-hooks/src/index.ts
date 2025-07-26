@@ -1,8 +1,8 @@
-type Paths = {
-    [key: string]: {
-        [key: string]: any;
-    };
-}
+// A lightweight description of the `paths` object shape emitted by
+// `openapi-typescript`. We intentionally do not require an index signature so
+// that the generated interface can be used directly.
+type PathsRecord = Record<string, Record<string, any>>;
+
 
 type HTTPMethod =
     | 'get'
@@ -14,11 +14,15 @@ type HTTPMethod =
     | 'patch'
     | 'trace';
 
-export type PathMethods<paths extends Paths, TPath extends keyof paths> = {
-    [TMethod in HTTPMethod]: paths[TPath][TMethod] extends undefined
-    ? never
-    : TMethod;
-}[HTTPMethod];
+export type PathMethods<paths, TPath extends keyof paths> = paths[TPath] extends Record<string, any>
+    ? {
+          [TMethod in HTTPMethod]: TMethod extends keyof paths[TPath]
+              ? paths[TPath][TMethod] extends undefined
+                  ? never
+                  : TMethod
+              : never;
+      }[HTTPMethod]
+    : never;
 
 type AnyRequestBody = {
     content: Record<string, any>;
@@ -134,7 +138,10 @@ const convertBody = (
     }
 };
 
-const decodeResponse = async (response, responseContentType) => {
+const decodeResponse = async (
+    response: Response,
+    responseContentType: string | null
+) => {
     switch (responseContentType) {
         // eslint-disable-next-line unicorn/no-null
         case null:
@@ -162,7 +169,7 @@ const decodeResponse = async (response, responseContentType) => {
     }
 };
 
-export const createFetch = <paths extends Paths>(options?: OpenApiHookOptions) => {
+export const createFetch = <paths>(options?: OpenApiHookOptions) => {
     const { baseUrl = window.location.toString(), headers: defaultHeaders, onError } = options ?? {};
 
     /**
@@ -254,9 +261,13 @@ export const createFetch = <paths extends Paths>(options?: OpenApiHookOptions) =
         TOptions extends TRoute['parameters'] & ApiRequestBody<TRoute['requestBody']> & {
             fetchOptions?: RequestInit;
         },
-        TRoute extends AnyRoute = paths[TPath][TMethod] extends AnyRoute
-        ? paths[TPath][TMethod]
-        : never,
+        TRoute extends AnyRoute = paths[TPath] extends Record<string, any>
+            ? TMethod extends keyof paths[TPath]
+                ? paths[TPath][TMethod] extends AnyRoute
+                    ? paths[TPath][TMethod]
+                    : never
+                : never
+            : never,
     >(
         path: TPath,
         method: TMethod,
