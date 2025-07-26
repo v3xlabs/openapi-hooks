@@ -9,9 +9,11 @@
     "url": "https://github.com/v3xlabs/openapi-hooks.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsup src/index.ts",
-    "dev": "tsup --watch src/index.ts"
+    "dev": "tsup --watch src/index.ts",
+    "test": "vitest --typecheck",
+    "test:schema:scalar-galaxy": "openapi-typescript https://cdn.jsdelivr.net/npm/@scalar/galaxy/dist/3.1.yaml -t -o ./test/schemas/scalar-galaxy.gen.ts",
+    "test:schema:ethereum-forum": "openapi-typescript https://ethereum.forum/openapi.json -t -o ./test/schemas/ethereum-forum.gen.ts"
   },
   "files": [
     "dist",
@@ -19,9 +21,8 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   },
   "keywords": [
@@ -34,11 +35,12 @@
   ],
   "author": "V3X Labs",
   "license": "GPL-3.0-only",
-  "dependencies": {
-    "tsup": "^8.3.5",
-    "tsx": "^4.19.2"
-  },
   "devDependencies": {
-    "typescript": "^5.7.2"
-  }
+    "openapi-typescript": "^7.5.1",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^3.2.4"
+  },
+  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"
 }
