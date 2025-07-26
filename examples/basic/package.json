@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "dev": "tsc ./src/index.ts",
+    "dev": "tsc -p tsconfig.json",
     "api-schema": "openapi-typescript http://localhost:3000/openapi.json -t -o ./src/schema.gen.ts"
   },
+  "type": "module",
   "keywords": [],
   "author": "V3X Labs",
   "license": "GPL-3.0-only",

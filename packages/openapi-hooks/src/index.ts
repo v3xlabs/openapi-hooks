@@ -1,9 +1,3 @@
-type Paths = {
-    [key: string]: {
-        [key: string]: any;
-    };
-}
-
 type HTTPMethod =
     | 'get'
     | 'put'
@@ -14,10 +8,14 @@ type HTTPMethod =
     | 'patch'
     | 'trace';
 
-export type PathMethods<paths extends Paths, TPath extends keyof paths> = {
-    [TMethod in HTTPMethod]: paths[TPath][TMethod] extends undefined
-    ? never
-    : TMethod;
+export type PathMethods<TPaths, TPath extends keyof TPaths> = {
+    [TMethod in HTTPMethod]: TPaths[TPath] extends Record<string, any>
+        ? TMethod extends keyof TPaths[TPath]
+            ? TPaths[TPath][TMethod] extends undefined
+                ? never
+                : TMethod
+            : never
+        : never;
 }[HTTPMethod];
 
 type AnyRequestBody = {
@@ -162,7 +160,7 @@ const decodeResponse = async (response, responseContentType) => {
     }
 };
 
-export const createFetch = <paths extends Paths>(options?: OpenApiHookOptions) => {
+export const createFetch = <TPaths>(options?: OpenApiHookOptions) => {
     const { baseUrl = window.location.toString(), headers: defaultHeaders, onError } = options ?? {};
 
     /**
@@ -249,13 +247,17 @@ export const createFetch = <paths extends Paths>(options?: OpenApiHookOptions) =
      * @throws {Error} When an unsupported content type is encountered
      */
     return async <
-        TPath extends keyof paths,
-        TMethod extends PathMethods<paths, TPath>,
+        TPath extends keyof TPaths,
+        TMethod extends PathMethods<TPaths, TPath>,
         TOptions extends TRoute['parameters'] & ApiRequestBody<TRoute['requestBody']> & {
             fetchOptions?: RequestInit;
         },
-        TRoute extends AnyRoute = paths[TPath][TMethod] extends AnyRoute
-        ? paths[TPath][TMethod]
+        TRoute extends AnyRoute = TPaths[TPath] extends Record<string, any>
+        ? TMethod extends keyof TPaths[TPath]
+            ? TPaths[TPath][TMethod] extends AnyRoute
+                ? TPaths[TPath][TMethod]
+                : never
+            : never
         : never,
     >(
         path: TPath,
