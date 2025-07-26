@@ -264,16 +264,22 @@ export const createFetch = <paths extends Paths>(
    *
    * @description
    * This function provides a strongly-typed interface for making API requests based on your OpenAPI schema.
-   * It handles authentication, request/response serialization, and error handling automatically.
+   * It handles authentication, request/response serialization, and preserves type safety by not automatically
+   * throwing on non-2xx responses. Use the onError callback for global error handling.
    *
    * @example
-   * Basic GET request:
+   * Basic GET request with status checking:
    * ```ts
    * const response = await fetching('/items', 'get', {
    *   query: { limit: 10, offset: 0 }
    * });
-   * // response.data is fully typed based on your API schema! 🎉
-   * console.log(response.data.items);
+   * 
+   * if (response.status === 200) {
+   *   // response.data is fully typed based on your API schema! 🎉
+   *   console.log(response.data.items);
+   * } else {
+   *   console.error(`Request failed with status: ${response.status}`);
+   * }
    * ```
    *
    * @example
@@ -286,6 +292,10 @@ export const createFetch = <paths extends Paths>(
    *     description: 'A very cool item indeed'
    *   }
    * });
+   * 
+   * if (response.status === 201) {
+   *   console.log('Created:', response.data);
+   * }
    * ```
    *
    * @example
@@ -294,6 +304,10 @@ export const createFetch = <paths extends Paths>(
    * const response = await fetching('/items/{itemId}', 'get', {
    *   path: { itemId: '123' }
    * });
+   * 
+   * if (response.status === 200) {
+   *   console.log('Item:', response.data);
+   * }
    * ```
    *
    * @example
@@ -307,14 +321,27 @@ export const createFetch = <paths extends Paths>(
    * ```
    *
    * @example
-   * Handling errors:
+   * Error handling with onError callback:
    * ```ts
-   * try {
-   *   const response = await fetching('/items', 'get', {});
-   * } catch (error) {
-   *   if (error instanceof ApiError) {
+   * const fetching = createFetch({
+   *   baseUrl: 'https://api.example.com',
+   *   onError: (error) => {
    *     console.error(`API Error ${error.status}: ${error.message}`);
+   *     // Handle global errors (logging, notifications, token refresh, etc.)
    *   }
+   * });
+   * 
+   * const response = await fetching('/items', 'get', {});
+   * // Check status manually for type safety
+   * switch (response.status) {
+   *   case 200:
+   *     console.log('Success:', response.data);
+   *     break;
+   *   case 404:
+   *     console.log('Not found');
+   *     break;
+   *   default:
+   *     console.log(`Unexpected status: ${response.status}`);
    * }
    * ```
    *
@@ -334,13 +361,12 @@ export const createFetch = <paths extends Paths>(
    *   - fetchOptions?: RequestInit - Additional fetch options
    *
    * @returns A Promise resolving to a typed response object containing:
-   *   - status: HTTP status code
+   *   - status: HTTP status code (preserves type safety by not throwing)
    *   - contentType: Response content type (if applicable)
-   *   - data: Response body (if applicable)
+   *   - data: Response body (if applicable, typed based on schema)
    *   - headers: Response headers
    *
-   * @throws {ApiError} When the server returns a non-2xx status code
-   * @throws {Error} When an unsupported content type is encountered
+   * @throws {Error} When an unsupported content type is encountered during encoding/decoding
    */
   return async <
     TPath extends keyof paths,

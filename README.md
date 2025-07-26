@@ -2,13 +2,22 @@
 
 Magical fetch inference for OpenAPI with React Query support
 
+## Features
+
+- **🔒 Type Safety**: Full TypeScript support with inferred types from your OpenAPI schema
+- **🚫 No Automatic Throwing**: Preserves type safety by not automatically throwing on non-2xx responses
+- **🎯 Flexible Error Handling**: Use the `onError` callback for custom error handling
+- **📊 Status Code Awareness**: Comprehensive HTTP status code types for better type inference
+- **🔄 React Query Ready**: Seamless integration with @tanstack/react-query
+- **⚙️ Customizable**: Extensible with custom fetch, encoding, and decoding functions
+
 ## Installation
 
 ```bash
 npm install openapi-hooks
 ```
 
-### Recommended OpenApi Setup
+### Recommended OpenAPI Setup
 
 ```bash
 npm install openapi-typescript
@@ -44,27 +53,66 @@ const fetching = createFetch({
 
 const response = await fetching("/items", "get", {});
 
-console.log(response.data);
+// Check the response status for type safety
+if (response.status === 200) {
+    console.log(response.data); // Fully typed based on your API schema! 🎉
+} else {
+    console.error(`Request failed with status: ${response.status}`);
+}
+```
+
+### Error Handling
+
+Unlike traditional fetch wrappers, `openapi-hooks` doesn't automatically throw on non-2xx responses. This preserves type safety and gives you full control over error handling:
+
+```tsx
+const response = await fetching("/items", "get", {});
+
+// Manual status checking for type safety
+switch (response.status) {
+    case 200:
+        console.log("Success:", response.data);
+        break;
+    case 404:
+        console.log("Not found");
+        break;
+    case 500:
+        console.log("Server error");
+        break;
+    default:
+        console.log(`Unexpected status: ${response.status}`);
+}
 ```
 
 ### @tanstack/react-query
 
-You can also easily use the `createFetch` function with [@tanstack/react-query](https://tanstack.com/query).
+You can easily use the `createFetch` function with [@tanstack/react-query](https://tanstack.com/query).
 
 We recommend the following approach to setup your queries:
 
 ```tsx
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, queryOptions } from "@tanstack/react-query";
 
 export const getTodos = () =>
     queryOptions({
         queryKey: ["todos"],
         queryFn: async () => {
             const response = await fetching("/todos", "get", {});
-
-            return response.data;
+            
+            if (response.status === 200) {
+                return response.data;
+            }
+            
+            throw new Error(`Failed to fetch todos: ${response.status}`);
         },
     });
 
 export const useTodos = () => useQuery(getTodos());
 ```
+
+## Examples
+
+Check out the [examples](./examples) directory for complete working examples:
+
+- [Basic Example](./examples/basic) - Simple usage without React
+- [React Query Example](./examples/react-query) - Integration with @tanstack/react-query
