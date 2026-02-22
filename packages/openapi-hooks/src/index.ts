@@ -1,11 +1,5 @@
 import type { HTTPStatusCode } from './statusCodes.js';
 
-type Paths = {
-  [key: string]: {
-    [key: string]: any;
-  };
-};
-
 type HTTPMethod =
   | "get"
   | "put"
@@ -16,8 +10,29 @@ type HTTPMethod =
   | "patch"
   | "trace";
 
-export type PathMethods<paths extends Paths, TPath extends keyof paths> = {
-  [TMethod in HTTPMethod]: paths[TPath][TMethod] extends undefined
+type RouteFor<
+  TPaths,
+  TPath extends keyof TPaths,
+  TMethod extends HTTPMethod,
+> = TMethod extends keyof TPaths[TPath]
+  ? Extract<NonNullable<TPaths[TPath][TMethod]>, AnyRoute>
+  : never;
+
+type EmptyParameters = {
+  query?: never;
+  header?: never;
+  path?: never;
+  cookie?: never;
+};
+
+type RouteParameters<TParameters> = [Extract<TParameters, AnyParameters>] extends [
+  never,
+]
+  ? EmptyParameters
+  : Extract<TParameters, AnyParameters>;
+
+export type PathMethods<TPaths, TPath extends keyof TPaths> = {
+  [TMethod in HTTPMethod]: [RouteFor<TPaths, TPath, TMethod>] extends [never]
     ? never
     : TMethod;
 }[HTTPMethod];
@@ -41,7 +56,7 @@ type AnyParameters = {
 type AnyRoute = {
   responses: AnyResponses;
   requestBody?: AnyRequestBody;
-  parameters: AnyParameters;
+  parameters?: AnyParameters;
 };
 
 type Prettify<T> = {
@@ -118,7 +133,7 @@ type UnknownApiResponse<TStatus> = {
   contentType?: string;
   data?: unknown;
   headers?: Headers;
-}
+};
 
 export type AnyApiResponse = {
   status: number;
@@ -127,18 +142,26 @@ export type AnyApiResponse = {
   headers?: Headers;
 };
 
-export type ApiRequestBody<TBody extends AnyRequestBody | undefined> =
-  TBody extends AnyRequestBody
-    ? {
-        [K in keyof TBody["content"]]: {
-          contentType: K;
-          data: TBody["content"][K];
-        };
-      }[keyof TBody["content"]]
-    : {
-        contentType?: undefined;
-        data?: undefined;
+type NoRequestBody = {
+  contentType?: undefined;
+  data?: undefined;
+};
+
+type RequestBodyContentType<TBody extends AnyRequestBody | undefined> = Extract<
+  keyof Extract<TBody, AnyRequestBody>["content"],
+  string
+>;
+
+export type ApiRequestBody<TBody extends AnyRequestBody | undefined> = [
+  Extract<TBody, AnyRequestBody>,
+] extends [never]
+  ? NoRequestBody
+  : {
+      [K in RequestBodyContentType<TBody>]: {
+        contentType: K;
+        data: Extract<TBody, AnyRequestBody>["content"][K];
       };
+    }[RequestBodyContentType<TBody>];
 
 export type HeaderObject = Record<string, string>;
 export type HeaderPredicate = () => PromiseLike<HeaderObject>;
@@ -247,7 +270,7 @@ const defaultDecodeResponse = async (
   }
 };
 
-export const createFetch = <paths extends Paths>(
+export const createFetch = <paths extends object>(
   options?: OpenApiHookOptions
 ) => {
   const {
@@ -347,7 +370,6 @@ export const createFetch = <paths extends Paths>(
    *
    * @template TPath - The API endpoint path (must exist in your OpenAPI schema)
    * @template TMethod - The HTTP method to use (must be valid for the given path)
-   * @template TOptions - Request options including query params, headers, and body
    * @template TRoute - Internal type representing the full route definition
    *
    * @param path - The API endpoint path (e.g., '/items')
@@ -369,15 +391,13 @@ export const createFetch = <paths extends Paths>(
    * @throws {Error} When an unsupported content type is encountered during encoding/decoding
    */
   return async <
-    TPath extends keyof paths,
+    TPath extends keyof paths & string,
     TMethod extends PathMethods<paths, TPath>,
-    TRoute extends AnyRoute = paths[TPath][TMethod] extends AnyRoute
-      ? paths[TPath][TMethod]
-      : never,
+    TRoute extends AnyRoute = RouteFor<paths, TPath, TMethod>,
   >(
     path: TPath,
     method: TMethod,
-    options: TRoute["parameters"] &
+    options: RouteParameters<TRoute["parameters"]> &
       ApiRequestBody<TRoute["requestBody"]> & {
         fetchOptions?: FetchOptions;
       }

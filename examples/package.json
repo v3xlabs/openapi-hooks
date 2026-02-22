@@ -1,0 +1,12 @@
+{
+    "name": "@openapi-hooks/examples",
+    "private": true,
+    "scripts": {
+        "schema": "pnpm run schema:terminal.shop && pnpm run schema:cataas.com",
+        "schema:terminal.shop": "openapi-typescript https://api.terminal.shop/doc -t -o ./_shared/terminal-shop.gen.ts",
+        "schema:cataas.com": "openapi-typescript https://cataas.com/doc.json -t -o ./_shared/cataas.gen.ts"
+    },
+    "devDependencies": {
+        "openapi-typescript": "^7"
+    }
+}

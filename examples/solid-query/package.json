@@ -1,0 +1,25 @@
+{
+    "name": "solid-query",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "vite",
+        "build": "vite build"
+    },
+    "keywords": [],
+    "author": "V3X Labs",
+    "license": "GPL-3.0-only",
+    "dependencies": {
+        "@tailwindcss/vite": "^4.2.0",
+        "@tanstack/router-plugin": "^1.95.1",
+        "@tanstack/solid-query": "^5.62.15",
+        "@tanstack/solid-query-devtools": "^5.91.3",
+        "openapi-hooks": "workspace:^",
+        "solid-js": "^1.9.11",
+        "tailwindcss": "^4.2.0",
+        "vite": "^6.0.7",
+        "vite-plugin-solid": "^2.11.10"
+    }
+}
