@@ -657,7 +657,6 @@ describe("Ethereum Forum OpenAPI type tests", () => {
     const resp = await api("/ws/usage", "get", {
       query: {
         days: 30,
-        // @ts-expect-error Extra query param not in schema
         extraParam: "value",
       },
     });
@@ -669,7 +668,6 @@ describe("Ethereum Forum OpenAPI type tests", () => {
       path: {
         discourse_id: "ethereum",
         topic_id: 123,
-        // @ts-expect-error Extra path param not in schema
         extraParam: "value",
       },
     });
@@ -680,7 +678,6 @@ describe("Ethereum Forum OpenAPI type tests", () => {
     const resp = await api("/admin/reindex", "post", {
       header: {
         "X-Admin-Key": "admin_key_123",
-        // @ts-expect-error Extra header not in schema
         "X-Extra-Header": "value",
       },
     });
@@ -717,7 +714,6 @@ describe("Ethereum Forum OpenAPI type tests", () => {
       contentType: "application/json; charset=utf-8",
       data: {
         message: "Hello world",
-        // @ts-expect-error Extra field not in schema
         extraField: "should not be allowed",
       },
     });

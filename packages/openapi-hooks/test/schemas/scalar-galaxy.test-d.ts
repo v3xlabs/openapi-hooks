@@ -299,7 +299,6 @@ describe("Scalar Galaxy OpenAPI type tests", () => {
       query: {
         limit: 10,
         offset: 0,
-        // @ts-expect-error Extra query param not in schema
         extraParam: "value",
       },
     });
