@@ -270,6 +270,11 @@ const defaultDecodeResponse = async (
   }
 };
 
+export type OptionsFor<TRoute extends AnyRoute> = RouteParameters<TRoute["parameters"]> &
+  ApiRequestBody<TRoute["requestBody"]> & {
+    fetchOptions?: FetchOptions;
+  };
+
 export const createFetch = <paths extends object>(
   options?: OpenApiHookOptions
 ) => {
@@ -394,13 +399,11 @@ export const createFetch = <paths extends object>(
     TPath extends keyof paths & string,
     TMethod extends PathMethods<paths, TPath>,
     TRoute extends AnyRoute = RouteFor<paths, TPath, TMethod>,
+    TOptions extends OptionsFor<TRoute> = OptionsFor<TRoute>
   >(
     path: TPath,
     method: TMethod,
-    options: RouteParameters<TRoute["parameters"]> &
-      ApiRequestBody<TRoute["requestBody"]> & {
-        fetchOptions?: FetchOptions;
-      }
+    options: TOptions,
   ): Promise<Prettify<ApiResponse<TRoute["responses"]>>> => {
     const {
       query,
