@@ -33,8 +33,8 @@ type RouteParameters<TParameters> = [Extract<TParameters, AnyParameters>] extend
 
 export type PathMethods<TPaths, TPath extends keyof TPaths> = {
   [TMethod in HTTPMethod]: [RouteFor<TPaths, TPath, TMethod>] extends [never]
-    ? never
-    : TMethod;
+  ? never
+  : TMethod;
 }[HTTPMethod];
 
 type AnyRequestBody = {
@@ -88,42 +88,42 @@ type Prettify<T> = {
  */
 export type ApiResponse<TResponses extends AnyResponses> = {
   [TStatus in keyof TResponses]: TStatus extends number // Only consider numeric status codes
-    ? // If there is no content for this status code
-      TResponses[TStatus]["content"] extends undefined
-      ? {
-          status: TStatus;
-          contentType: never;
-          data: never;
-          headers: TResponses[TStatus]["headers"] extends Record<
-            string,
-            unknown
-          >
-            ? // If headers is a record, represent as a Map
-              Map<
-                keyof TResponses[TStatus]["headers"],
-                TResponses[TStatus]["headers"][keyof TResponses[TStatus]["headers"]]
-              >
-            : // Otherwise, use headers as-is
-              TResponses[TStatus]["headers"];
-        }
-      : // If there is content, create a union for each content type
-        {
-          [K in keyof TResponses[TStatus]["content"]]: {
-            status: TStatus;
-            contentType: K;
-            data: TResponses[TStatus]["content"][K];
-            headers: TResponses[TStatus]["headers"] extends Record<
-              string,
-              unknown
-            >
-              ? Map<
-                  keyof TResponses[TStatus]["headers"],
-                  TResponses[TStatus]["headers"][keyof TResponses[TStatus]["headers"]]
-                >
-              : TResponses[TStatus]["headers"];
-          };
-        }[keyof TResponses[TStatus]["content"]]
-    : never;
+  ? // If there is no content for this status code
+  TResponses[TStatus]["content"] extends undefined
+  ? {
+    status: TStatus;
+    contentType: never;
+    data: never;
+    headers: TResponses[TStatus]["headers"] extends Record<
+      string,
+      unknown
+    >
+    ? // If headers is a record, represent as a Map
+    Map<
+      keyof TResponses[TStatus]["headers"],
+      TResponses[TStatus]["headers"][keyof TResponses[TStatus]["headers"]]
+    >
+    : // Otherwise, use headers as-is
+    TResponses[TStatus]["headers"];
+  }
+  : // If there is content, create a union for each content type
+  {
+    [K in keyof TResponses[TStatus]["content"]]: {
+      status: TStatus;
+      contentType: K;
+      data: TResponses[TStatus]["content"][K];
+      headers: TResponses[TStatus]["headers"] extends Record<
+        string,
+        unknown
+      >
+      ? Map<
+        keyof TResponses[TStatus]["headers"],
+        TResponses[TStatus]["headers"][keyof TResponses[TStatus]["headers"]]
+      >
+      : TResponses[TStatus]["headers"];
+    };
+  }[keyof TResponses[TStatus]["content"]]
+  : never;
 }[keyof TResponses] | UnknownApiResponse<keyof TResponses>;
 
 type ExcludedStatusCodes<TStatus> = Exclude<HTTPStatusCode, TStatus> & {};
@@ -157,11 +157,11 @@ export type ApiRequestBody<TBody extends AnyRequestBody | undefined> = [
 ] extends [never]
   ? NoRequestBody
   : {
-      [K in RequestBodyContentType<TBody>]: {
-        contentType: K;
-        data: Extract<TBody, AnyRequestBody>["content"][K];
-      };
-    }[RequestBodyContentType<TBody>];
+    [K in RequestBodyContentType<TBody>]: {
+      contentType: K;
+      data: Extract<TBody, AnyRequestBody>["content"][K];
+    };
+  }[RequestBodyContentType<TBody>];
 
 export type HeaderObject = Record<string, string>;
 export type HeaderPredicate = () => PromiseLike<HeaderObject>;
@@ -189,8 +189,8 @@ export type OpenApiHookOptions = {
 export type FetchOptions =
   | RequestInit
   | ((
-      base: Pick<RequestInit, "body" | "headers" | "method" | "mode">
-    ) => RequestInit);
+    base: Pick<RequestInit, "body" | "headers" | "method" | "mode">
+  ) => RequestInit);
 
 export class ApiError extends Error {
   constructor(
@@ -269,6 +269,11 @@ const defaultDecodeResponse = async (
       throw new Error("Unsupported content type: " + responseContentType);
   }
 };
+
+export type OptionsFor<TRoute extends AnyRoute> = RouteParameters<TRoute["parameters"]> &
+  ApiRequestBody<TRoute["requestBody"]> & {
+    fetchOptions?: FetchOptions;
+  };
 
 export const createFetch = <paths extends object>(
   options?: OpenApiHookOptions
@@ -394,13 +399,11 @@ export const createFetch = <paths extends object>(
     TPath extends keyof paths & string,
     TMethod extends PathMethods<paths, TPath>,
     TRoute extends AnyRoute = RouteFor<paths, TPath, TMethod>,
+    TOptions extends OptionsFor<TRoute> = OptionsFor<TRoute>
   >(
     path: TPath,
     method: TMethod,
-    options: RouteParameters<TRoute["parameters"]> &
-      ApiRequestBody<TRoute["requestBody"]> & {
-        fetchOptions?: FetchOptions;
-      }
+    options: TOptions,
   ): Promise<Prettify<ApiResponse<TRoute["responses"]>>> => {
     const {
       query,
@@ -462,9 +465,9 @@ export const createFetch = <paths extends object>(
         ? typeof fetchOptions === "function"
           ? fetchOptions(baseOptions)
           : {
-              ...baseOptions,
-              ...fetchOptions,
-            }
+            ...baseOptions,
+            ...fetchOptions,
+          }
         : baseOptions
     );
 

@@ -98,12 +98,10 @@ export const getTodos = () =>
         queryKey: ["todos"],
         queryFn: async () => {
             const response = await fetching("/todos", "get", {});
+
+            if (response.status !== 200) throw new Error(`Failed to fetch todos: ${response.status}`);
             
-            if (response.status === 200) {
-                return response.data;
-            }
-            
-            throw new Error(`Failed to fetch todos: ${response.status}`);
+            return response.data;
         },
     });
 
@@ -116,3 +114,4 @@ Check out the [examples](./examples) directory for complete working examples:
 
 - [Basic Example](./examples/basic) - Simple usage without React
 - [React Query Example](./examples/react-query) - Integration with @tanstack/react-query
+- [Solid Query Example](./examples/solid-query) - Integration with @tanstack/solid-query
