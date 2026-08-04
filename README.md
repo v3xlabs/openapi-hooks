@@ -1,6 +1,19 @@
-# openapi-hooks
+<p align="center">
+  <a href="https://npmx.dev/package/openapi-hooks">
+    <picture>
+      <source srcset="./packages/openapi-hooks/public/openapi-hooks-logo.svg" media="(prefers-color-scheme: dark)">
+      <img src="./packages/openapi-hooks/public/openapi-hooks-logo.svg" alt="OpenAPI Hooks" width="auto" height="60">
+    </picture>
+  </a>
+</p>
 
-Magical fetch inference for OpenAPI with React Query support
+<p align="center">
+    Magical fetch inference for OpenAPI with React Query support
+</p>
+
+<p align="center">
+    <a href="#"><img src="https://img.shields.io/badge/License-LGPL--3.0-hotpink?style=flat" alt="License: LGPL-3.0"></a>
+</p>
 
 ## Features
 
