@@ -36,6 +36,8 @@
   "author": "V3X Labs",
   "license": "GPL-3.0-only",
   "devDependencies": {
+    "eslint": "^10.8.0",
+    "eslint-plugin-v3xlabs": "^1.8.1",
     "openapi-typescript": "^7.13.0",
     "tsup": "^8.5.1",
     "tsx": "^4.19.2",
