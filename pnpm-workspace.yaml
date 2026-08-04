@@ -1,6 +1,5 @@
 packages:
-  - packages/*
+  - package
   - examples/*
-  - examples/
 allowBuilds:
   esbuild: false
