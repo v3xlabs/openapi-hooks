@@ -1,15 +1,15 @@
 import type { ApiError } from "./error.js";
 import type { HTTPStatusCode } from "./status.js";
 
-export type HTTPMethod =
-  | "get"
-  | "put"
-  | "post"
-  | "delete"
-  | "options"
-  | "head"
-  | "patch"
-  | "trace";
+export type HTTPMethod
+  = | "get"
+    | "put"
+    | "post"
+    | "delete"
+    | "options"
+    | "head"
+    | "patch"
+    | "trace";
 
 export type RouteFor<
   TPaths,
@@ -34,8 +34,8 @@ export type RouteParameters<TParameters> = [Extract<TParameters, AnyParameters>]
 
 export type PathMethods<TPaths, TPath extends keyof TPaths> = {
   [TMethod in HTTPMethod]: [RouteFor<TPaths, TPath, TMethod>] extends [never]
-  ? never
-  : TMethod;
+    ? never
+    : TMethod;
 }[HTTPMethod];
 
 export type AnyRequestBody = {
@@ -44,7 +44,7 @@ export type AnyRequestBody = {
 
 export type AnyResponses = Record<
   number,
-  { content?: Record<string, any>; headers?: Record<string, any> }
+  { content?: Record<string, any>; headers?: Record<string, any>; }
 >;
 
 export type AnyParameters = {
@@ -89,42 +89,42 @@ export type Prettify<T> = {
  */
 export type ApiResponse<TResponses extends AnyResponses> = {
   [TStatus in keyof TResponses]: TStatus extends number // Only consider numeric status codes
-  ? // If there is no content for this status code
-  TResponses[TStatus]["content"] extends undefined
-  ? {
-    status: TStatus;
-    contentType: never;
-    data: never;
-    headers: TResponses[TStatus]["headers"] extends Record<
-      string,
-      unknown
-    >
-    ? // If headers is a record, represent as a Map
-    Map<
-      keyof TResponses[TStatus]["headers"],
-      TResponses[TStatus]["headers"][keyof TResponses[TStatus]["headers"]]
-    >
-    : // Otherwise, use headers as-is
-    TResponses[TStatus]["headers"];
-  }
-  : // If there is content, create a union for each content type
-  {
-    [K in keyof TResponses[TStatus]["content"]]: {
-      status: TStatus;
-      contentType: K;
-      data: TResponses[TStatus]["content"][K];
-      headers: TResponses[TStatus]["headers"] extends Record<
-        string,
-        unknown
-      >
-      ? Map<
-        keyof TResponses[TStatus]["headers"],
-        TResponses[TStatus]["headers"][keyof TResponses[TStatus]["headers"]]
-      >
-      : TResponses[TStatus]["headers"];
-    };
-  }[keyof TResponses[TStatus]["content"]]
-  : never;
+    ? // If there is no content for this status code
+    TResponses[TStatus]["content"] extends undefined
+      ? {
+          status: TStatus;
+          contentType: never;
+          data: never;
+          headers: TResponses[TStatus]["headers"] extends Record<
+            string,
+            unknown
+          >
+            ? // If headers is a record, represent as a Map
+            Map<
+              keyof TResponses[TStatus]["headers"],
+              TResponses[TStatus]["headers"][keyof TResponses[TStatus]["headers"]]
+            >
+            : // Otherwise, use headers as-is
+            TResponses[TStatus]["headers"];
+        }
+      : // If there is content, create a union for each content type
+        {
+          [K in keyof TResponses[TStatus]["content"]]: {
+            status: TStatus;
+            contentType: K;
+            data: TResponses[TStatus]["content"][K];
+            headers: TResponses[TStatus]["headers"] extends Record<
+              string,
+              unknown
+            >
+              ? Map<
+                keyof TResponses[TStatus]["headers"],
+                TResponses[TStatus]["headers"][keyof TResponses[TStatus]["headers"]]
+              >
+              : TResponses[TStatus]["headers"];
+          };
+        }[keyof TResponses[TStatus]["content"]]
+    : never;
 }[keyof TResponses] | UnknownApiResponse<keyof TResponses>;
 
 export type ExcludedStatusCodes<TStatus> = Exclude<HTTPStatusCode, TStatus> & {};
@@ -158,11 +158,11 @@ export type ApiRequestBody<TBody extends AnyRequestBody | undefined> = [
 ] extends [never]
   ? NoRequestBody
   : {
-    [K in RequestBodyContentType<TBody>]: {
-      contentType: K;
-      data: Extract<TBody, AnyRequestBody>["content"][K];
-    };
-  }[RequestBodyContentType<TBody>];
+      [K in RequestBodyContentType<TBody>]: {
+        contentType: K;
+        data: Extract<TBody, AnyRequestBody>["content"][K];
+      };
+    }[RequestBodyContentType<TBody>];
 
 export type HeaderObject = Record<string, string>;
 export type HeaderPredicate = () => PromiseLike<HeaderObject>;
@@ -174,10 +174,10 @@ export type OpenApiHookOptions = {
   fetch?: typeof fetch;
   decodeResponse?: (
     response: Response,
-    responseContentType: string | null
+    responseContentType: string | null,
   ) => Promise<AnyApiResponse>;
   encodeBody?: (
     data: any,
-    contentType: string | undefined
+    contentType: string | undefined,
   ) => BodyInit | undefined;
 };

@@ -6,15 +6,15 @@ import type { AnyApiResponse, AnyRoute, ApiRequestBody, ApiResponse, OpenApiHook
  * It can be a RequestInit object or a function that takes a base RequestInit object and returns a RequestInit object.
  * The function is useful for adding additional headers or other properties to the request or modifying properties.
  */
-export type FetchOptions =
-  | RequestInit
-  | ((
-    base: Pick<RequestInit, "body" | "headers" | "method" | "mode">
-  ) => RequestInit);
+export type FetchOptions
+  = | RequestInit
+    | ((
+      base: Pick<RequestInit, "body" | "headers" | "method" | "mode">,
+    ) => RequestInit);
 
 const defaultEncodeBody = (
   data: any,
-  contentType: string | undefined
+  contentType: string | undefined,
 ): BodyInit | undefined => {
   if (contentType === undefined) {
     return;
@@ -22,57 +22,63 @@ const defaultEncodeBody = (
 
   switch (contentType) {
     case "application/json":
-    case "application/json; charset=utf-8":
+    case "application/json; charset=utf-8": {
       return JSON.stringify(data);
-    default:
+    }
+    default: {
       throw new Error("Unsupported content type: " + contentType);
+    }
   }
 };
 
 const defaultDecodeResponse = async (
   response: Response,
-  responseContentType: string | null
+  responseContentType: string | null,
 ): Promise<AnyApiResponse> => {
   switch (responseContentType) {
     // eslint-disable-next-line unicorn/no-null
-    case null:
+    case null: {
       return {
         status: response.status,
         headers: response.headers,
       };
+    }
 
-    case "text/plain; charset=utf-8":
+    case "text/plain; charset=utf-8": {
       return {
         status: response.status,
         contentType: responseContentType,
         data: await response.text(),
       };
+    }
 
-    case "application/json; charset=utf-8":
+    case "application/json; charset=utf-8": {
       return {
         status: response.status,
         contentType: responseContentType,
         data: await response.json(),
         headers: response.headers,
       };
-    default:
+    }
+    default: {
       throw new Error("Unsupported content type: " + responseContentType);
+    }
   }
 };
 
-export type OptionsFor<TRoute extends AnyRoute> = RouteParameters<TRoute["parameters"]> &
-  ApiRequestBody<TRoute["requestBody"]> & {
+export type OptionsFor<TRoute extends AnyRoute> = RouteParameters<TRoute["parameters"]>
+  & ApiRequestBody<TRoute["requestBody"]> & {
     fetchOptions?: FetchOptions;
   };
 
 export const createFetch = <paths extends object>(
-  options?: OpenApiHookOptions
+  options?: OpenApiHookOptions,
 ) => {
   const {
-    baseUrl = window.location.toString(),
+    baseUrl = globalThis.location.toString(),
     headers: defaultHeaders,
     onError,
-    fetch: fetchFn = fetch,
+    fetch: fetchFunction = fetch,
     decodeResponse = defaultDecodeResponse,
     encodeBody = defaultEncodeBody,
   } = options ?? {};
@@ -91,7 +97,7 @@ export const createFetch = <paths extends object>(
    * const response = await fetching('/items', 'get', {
    *   query: { limit: 10, offset: 0 }
    * });
-   * 
+   *
    * if (response.status === 200) {
    *   // response.data is fully typed based on your API schema! 🎉
    *   console.log(response.data.items);
@@ -110,7 +116,7 @@ export const createFetch = <paths extends object>(
    *     description: 'A very cool item indeed'
    *   }
    * });
-   * 
+   *
    * if (response.status === 201) {
    *   console.log('Created:', response.data);
    * }
@@ -122,7 +128,7 @@ export const createFetch = <paths extends object>(
    * const response = await fetching('/items/{itemId}', 'get', {
    *   path: { itemId: '123' }
    * });
-   * 
+   *
    * if (response.status === 200) {
    *   console.log('Item:', response.data);
    * }
@@ -148,7 +154,7 @@ export const createFetch = <paths extends object>(
    *     // Handle global errors (logging, notifications, token refresh, etc.)
    *   }
    * });
-   * 
+   *
    * const response = await fetching('/items', 'get', {});
    * // Check status manually for type safety
    * switch (response.status) {
@@ -189,7 +195,7 @@ export const createFetch = <paths extends object>(
     TPath extends keyof paths & string,
     TMethod extends PathMethods<paths, TPath>,
     TRoute extends AnyRoute = RouteFor<paths, TPath, TMethod>,
-    TOptions extends OptionsFor<TRoute> = OptionsFor<TRoute>
+    TOptions extends OptionsFor<TRoute> = OptionsFor<TRoute>,
   >(
     path: TPath,
     method: TMethod,
@@ -206,11 +212,11 @@ export const createFetch = <paths extends object>(
 
     if (pathParameters) {
       for (const [key, value] of Object.entries(pathParameters)) {
-        path = path.toString().replace(`{${key}}`, value) as TPath;
+        path = path.replace(`{${key}}`, value) as TPath;
       }
     }
 
-    const url = new URL(`.${path.toString()}`, baseUrl);
+    const url = new URL(`.${path}`, baseUrl);
 
     if (query) {
       for (const [key, value] of Object.entries(query)) {
@@ -223,8 +229,8 @@ export const createFetch = <paths extends object>(
     const headers = new Headers();
 
     if (defaultHeaders) {
-      let addDefaultHeaders =
-        typeof defaultHeaders === "function"
+      const addDefaultHeaders
+        = typeof defaultHeaders === "function"
           ? await defaultHeaders()
           : defaultHeaders;
 
@@ -249,16 +255,16 @@ export const createFetch = <paths extends object>(
       body: encodeBody(data, contentType),
     };
 
-    const response = await fetchFn(
+    const response = await fetchFunction(
       url,
       fetchOptions
-        ? typeof fetchOptions === "function"
-          ? fetchOptions(baseOptions)
-          : {
-            ...baseOptions,
-            ...fetchOptions,
-          }
-        : baseOptions
+        ? (typeof fetchOptions === "function"
+            ? fetchOptions(baseOptions)
+            : {
+                ...baseOptions,
+                ...fetchOptions,
+              })
+        : baseOptions,
     );
 
     if (!response.ok) {

@@ -1,8 +1,8 @@
 <p align="center">
   <a href="https://npmx.dev/package/openapi-hooks">
     <picture>
-      <source srcset="./packages/openapi-hooks/public/openapi-hooks-logo.svg" media="(prefers-color-scheme: dark)">
-      <img src="./packages/openapi-hooks/public/openapi-hooks-logo.svg" alt="OpenAPI Hooks" width="auto" height="60">
+      <source srcset="./package/public/openapi-hooks-logo.svg" media="(prefers-color-scheme: dark)">
+      <img src="./package/public/openapi-hooks-logo.svg" alt="OpenAPI Hooks" width="auto" height="60">
     </picture>
   </a>
 </p>

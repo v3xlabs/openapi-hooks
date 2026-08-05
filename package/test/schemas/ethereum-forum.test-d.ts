@@ -1,4 +1,5 @@
-import { describe, it, assertType, expectTypeOf, assert } from "vitest";
+import { assert, assertType, describe, it } from "vitest";
+
 import { createFetch } from "../../src/index.js";
 import type { paths } from "./ethereum-forum.gen.js";
 
@@ -8,6 +9,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
   it("GET /topics", async () => {
     type Route = paths["/topics"]["get"];
     const resp = await api("/topics", "get", {});
+
     assert(resp.status === 200);
     assertType<200>(resp.status);
     type Response = Route["responses"]["200"];
@@ -18,6 +20,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
   it("GET /topics/trending", async () => {
     type Route = paths["/topics/trending"]["get"];
     const resp = await api("/topics/trending", "get", {});
+
     assert(resp.status === 200);
     assertType<200>(resp.status);
     type Response = Route["responses"]["200"];
@@ -101,6 +104,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
   it("GET /users", async () => {
     type Route = paths["/users"]["get"];
     const resp = await api("/users", "get", {});
+
     assert(resp.status === 200);
     assertType<200>(resp.status);
     type Response = Route["responses"]["200"];
@@ -111,6 +115,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
   it("GET /user/profile", async () => {
     type Route = paths["/user/profile"]["get"];
     const resp = await api("/user/profile", "get", {});
+
     assert(resp.status === 200);
     assertType<200>(resp.status);
     type Response = Route["responses"]["200"];
@@ -165,6 +170,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
   it("GET /user/sso/providers", async () => {
     type Route = paths["/user/sso/providers"]["get"];
     const resp = await api("/user/sso/providers", "get", {});
+
     assert(resp.status === 200);
     assertType<200>(resp.status);
     type Response = Route["responses"]["200"];
@@ -255,6 +261,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
   it("GET /events", async () => {
     type Route = paths["/events"]["get"];
     const resp = await api("/events", "get", {});
+
     assert(resp.status === 200);
     assertType<200>(resp.status);
     type Response = Route["responses"]["200"];
@@ -265,6 +272,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
   it("GET /events/recent", async () => {
     type Route = paths["/events/recent"]["get"];
     const resp = await api("/events/recent", "get", {});
+
     assert(resp.status === 200);
     assertType<200>(resp.status);
     type Response = Route["responses"]["200"];
@@ -321,6 +329,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
   it("GET /ws/chat", async () => {
     type Route = paths["/ws/chat"]["get"];
     const resp = await api("/ws/chat", "get", {});
+
     assert(resp.status === 200);
     assertType<200>(resp.status);
     type Response = Route["responses"]["200"];
@@ -331,6 +340,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
   it("GET /ws/models", async () => {
     type Route = paths["/ws/models"]["get"];
     const resp = await api("/ws/models", "get", {});
+
     assert(resp.status === 200);
     assertType<200>(resp.status);
     type Response = Route["responses"]["200"];
@@ -519,6 +529,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
   it("GET /search", async () => {
     type Route = paths["/search"]["get"];
     const resp = await api("/search", "get", {});
+
     assert(resp.status === 200);
     assertType<200>(resp.status);
     type Response = Route["responses"]["200"];
@@ -761,9 +772,9 @@ describe("Ethereum Forum OpenAPI type tests", () => {
       if (resp.status === 200) {
         // PMMeetingData is a union type - test both branches
         type PMData = paths["/pm/{issue_id}"]["get"]["responses"]["200"]["content"]["application/json; charset=utf-8"];
-        
+
         // Test that we can discriminate the union
-        if ('is_recurring' in resp.data && resp.data.is_recurring) {
+        if ("is_recurring" in resp.data && resp.data.is_recurring) {
           // Should be PMRecurringMeeting
           assertType<{
             meeting_id: string;
@@ -775,7 +786,8 @@ describe("Ethereum Forum OpenAPI type tests", () => {
             occurrences?: any[];
             extra: Record<string, unknown>;
           }>(resp.data);
-        } else {
+        }
+        else {
           // Should be PMOneOffMeeting
           assertType<{
             discourse_topic_id?: string;
@@ -798,32 +810,33 @@ describe("Ethereum Forum OpenAPI type tests", () => {
 
     it("should handle complex array types with optional elements", async () => {
       const resp = await api("/events", "get", {});
-      
+
       if (resp.status === 200) {
         // RichCalendarEvent has complex nested arrays
         type Event = paths["/events"]["get"]["responses"]["200"]["content"]["application/json; charset=utf-8"][0];
-        
+
         // Test array access and optional properties
         const firstEvent = resp.data[0];
-        if (firstEvent) {
-          // Test deeply nested optional arrays
-          if (firstEvent.meetings && firstEvent.meetings.length > 0) {
-            const firstMeeting = firstEvent.meetings[0];
-            if (firstMeeting) {
-              // Test union type discrimination in meetings
-              if (firstMeeting.type === "Zoom") {
-                assertType<{
-                  type: "Zoom";
-                  link: string;
-                  meeting_id?: string;
-                  passcode?: string;
-                }>(firstMeeting);
-              } else if (firstMeeting.type === "Google") {
-                assertType<{
-                  type: "Google";
-                  link: string;
-                }>(firstMeeting);
-              }
+
+        // Test deeply nested optional arrays
+        if (firstEvent && firstEvent.meetings && firstEvent.meetings.length > 0) {
+          const firstMeeting = firstEvent.meetings[0];
+
+          if (firstMeeting) {
+            // Test union type discrimination in meetings
+            if (firstMeeting.type === "Zoom") {
+              assertType<{
+                type: "Zoom";
+                link: string;
+                meeting_id?: string;
+                passcode?: string;
+              }>(firstMeeting);
+            }
+            else if (firstMeeting.type === "Google") {
+              assertType<{
+                type: "Google";
+                link: string;
+              }>(firstMeeting);
             }
           }
         }
@@ -838,11 +851,13 @@ describe("Ethereum Forum OpenAPI type tests", () => {
       if (resp.status === 200) {
         // DiscourseUserProfile has deeply nested optional properties
         type Profile = paths["/du/{discourse_id}/{username}"]["get"]["responses"]["200"]["content"]["application/json; charset=utf-8"];
-        
+
         // Test extreme optional chaining
         const user = resp.data.user;
+
         if (user && resp.data.badges && resp.data.badges.length > 0) {
           const firstBadge = resp.data.badges[0];
+
           // Test optional number fields
           assertType<number | undefined>(firstBadge.id);
           assertType<number | undefined>(firstBadge.count);
@@ -858,14 +873,15 @@ describe("Ethereum Forum OpenAPI type tests", () => {
       if (resp.status === 200) {
         // StreamingResponse has complex union types
         type StreamEntry = paths["/ws/chat/{chat_id}/{message_id}/stream"]["get"]["responses"]["200"]["content"]["text/event-stream"][0];
-        
+
         // Test string literal union discrimination
         if (resp.data && resp.data.length > 0) {
           const entry = resp.data[0];
+
           if (entry) {
             // Test that entry_type is one of the expected values
             assertType<"Content" | "ToolCallStart" | "ToolCallResult" | "ToolCallError">(entry.entry_type);
-            
+
             // Test the full entry structure
             assertType<{
               content: string;
@@ -882,30 +898,30 @@ describe("Ethereum Forum OpenAPI type tests", () => {
     it("should handle extreme type widening scenarios", async () => {
       // Test with unknown data types
       const resp = await api("/users", "get", {});
-      
+
       if (resp.status === 200) {
         // /users returns unknown - test extreme type widening
         type UserResponse = paths["/users"]["get"]["responses"]["200"]["content"]["application/json; charset=utf-8"];
-        
+
         // This should be unknown, but let's test what happens with extreme assertions
         assertType<unknown>(resp.data);
-        
+
         // Test that we can't accidentally narrow unknown
         // This should work since we're explicitly casting
-        const narrowed = resp.data as { users: any[] };
+        const narrowed = resp.data as { users: any[]; };
       }
     });
 
     it("should handle complex intersection types", async () => {
       const resp = await api("/user/profile", "get", {});
-      
+
       if (resp.status === 200) {
         // UserProfileResponse has intersection-like properties
         type Profile = paths["/user/profile"]["get"]["responses"]["200"]["content"]["application/json; charset=utf-8"];
-        
+
         // Test complex property access patterns
         const profile = resp.data;
-        
+
         // Test that all required properties exist
         assertType<string>(profile.user_id);
         assertType<string>(profile.email);
@@ -913,7 +929,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
         assertType<string>(profile.provider);
         assertType<number>(profile.expires_at);
         assertType<boolean>(profile.token_expiring_soon);
-        
+
         // Test optional properties
         assertType<string | undefined>(profile.display_name);
         assertType<string | undefined>(profile.avatar_url);
@@ -927,24 +943,24 @@ describe("Ethereum Forum OpenAPI type tests", () => {
         contentType: "application/json; charset=utf-8",
         data: {
           message: "Test message with extreme characters: 🚀🔥💻🎯",
-          model: "gpt-4-turbo-preview"
-        }
+          model: "gpt-4-turbo-preview",
+        },
       });
 
       if (resp.status === 200) {
         // WorkshopMessage has complex generic constraints
         type Message = paths["/ws/chat/{chat_id}"]["post"]["responses"]["200"]["content"]["application/json; charset=utf-8"];
-        
+
         // Test UUID string constraints
         assertType<string>(resp.data.message_id);
         assertType<string>(resp.data.chat_id);
-        
+
         // Test enum-like string constraints
         assertType<string>(resp.data.sender_role);
-        
+
         // Test optional UUID constraints
         assertType<string | undefined>(resp.data.parent_message_id);
-        
+
         // Test complex optional fields
         assertType<unknown | undefined>(resp.data.streaming_events);
         assertType<number | undefined>(resp.data.prompt_tokens);
@@ -964,9 +980,9 @@ describe("Ethereum Forum OpenAPI type tests", () => {
       if (resp.status === 200) {
         // WorkshopChatPayload has complex optional structures
         type ChatPayload = paths["/ws/chat/{chat_id}"]["get"]["responses"]["200"]["content"]["application/json; charset=utf-8"];
-        
+
         const payload = resp.data;
-        
+
         // Test that required fields are never null/undefined
         assertType<string>(payload.chat_id);
         assertType<{
@@ -978,7 +994,7 @@ describe("Ethereum Forum OpenAPI type tests", () => {
           summary?: string;
           last_message_id?: string;
         }>(payload.chat);
-        
+
         // Test array that might be empty but not null
         assertType<any[]>(payload.messages);
       }
@@ -992,19 +1008,20 @@ describe("Ethereum Forum OpenAPI type tests", () => {
       if (resp.status === 200) {
         // UserUsageResponse has complex number constraints
         type Usage = paths["/ws/usage"]["get"]["responses"]["200"]["content"]["application/json; charset=utf-8"];
-        
+
         const usage = resp.data;
-        
+
         // Test int64 constraints (should be number in JS)
         assertType<number>(usage.stats.total_prompt_tokens);
         assertType<number>(usage.stats.total_completion_tokens);
         assertType<number>(usage.stats.total_tokens);
         assertType<number>(usage.stats.total_reasoning_tokens);
         assertType<number>(usage.stats.message_count);
-        
+
         // Test array of complex number objects
         if (usage.by_model && usage.by_model.length > 0) {
           const modelUsage = usage.by_model[0];
+
           assertType<string>(modelUsage.model_name);
           assertType<number>(modelUsage.prompt_tokens);
           assertType<number>(modelUsage.completion_tokens);
@@ -1017,19 +1034,19 @@ describe("Ethereum Forum OpenAPI type tests", () => {
 
     it("should handle extreme date/time string constraints", async () => {
       const resp = await api("/events/recent", "get", {});
-      
+
       if (resp.status === 200) {
         // RichCalendarEvent has complex date/time constraints
         type Event = paths["/events/recent"]["get"]["responses"]["200"]["content"]["application/json; charset=utf-8"][0];
-        
+
         if (resp.data && resp.data.length > 0) {
           const event = resp.data[0];
-          
+
           // Test date-time string constraints
           assertType<string | undefined>(event.last_modified);
           assertType<string | undefined>(event.created);
           assertType<string | undefined>(event.start);
-          
+
           // Test enum constraints
           assertType<"Single" | "Recurring">(event.occurance);
         }
@@ -1041,7 +1058,6 @@ describe("Ethereum Forum OpenAPI type tests", () => {
       // @ts-expect-error Should not allow non-existent routes
       const resp = await api("/non/existent/route", "get", {});
     });
-  
 
     it("should handle extreme parameter type mismatches", async () => {
       // Test wrong parameter types
@@ -1099,11 +1115,11 @@ describe("Ethereum Forum OpenAPI type tests", () => {
     it("should handle extreme response type constraints", async () => {
       // Test accessing non-existent response properties
       const resp = await api("/topics", "get", {});
-      
+
       if (resp.status === 200) {
         // @ts-expect-error Should not allow accessing non-existent properties
         const nonExistent = resp.data.nonExistentProperty;
       }
     });
   });
-}); 
+});

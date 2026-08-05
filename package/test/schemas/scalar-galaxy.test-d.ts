@@ -1,4 +1,5 @@
-import { describe, it, assertType, expectTypeOf, assert } from "vitest";
+import { assert, assertType, describe, it } from "vitest";
+
 import { createFetch } from "../../src/index.js";
 import type { paths } from "./scalar-galaxy.gen.js";
 
@@ -8,6 +9,7 @@ describe("Scalar Galaxy OpenAPI type tests", () => {
   it("GET /planets without query params", async () => {
     type Route = paths["/planets"]["get"];
     const resp = await api("/planets", "get", {});
+
     assert(resp.status === 200);
     assertType<200>(resp.status);
     type Response = Route["responses"]["200"];
@@ -42,11 +44,13 @@ describe("Scalar Galaxy OpenAPI type tests", () => {
       type Response = Route["responses"]["200"];
       assertType<keyof Response["content"]>(resp.contentType);
       assertType<Response["content"][keyof Response["content"]]>(resp.data);
-    } else if (resp.status === 404) {
+    }
+    else if (resp.status === 404) {
       type Response = Route["responses"]["404"];
       assertType<keyof Response["content"]>(resp.contentType);
       assertType<Response["content"][keyof Response["content"]]>(resp.data);
-    } else {
+    }
+    else {
       // Unknown status code
       assert(false);
     }
@@ -122,7 +126,8 @@ describe("Scalar Galaxy OpenAPI type tests", () => {
       // Should have no content
       assertType<never>(resp.contentType);
       assertType<never>(resp.data);
-    } else if (resp.status === 404) {
+    }
+    else if (resp.status === 404) {
       type Response = Route["responses"]["404"];
       assertType<keyof Response["content"]>(resp.contentType);
       assertType<Response["content"][keyof Response["content"]]>(resp.data);
@@ -252,18 +257,29 @@ describe("Scalar Galaxy OpenAPI type tests", () => {
     type Route = paths["/me"]["get"];
     const resp = await api("/me", "get", {});
 
-    if (resp.status === 200) {
-      type Response = Route["responses"]["200"];
-      assertType<keyof Response["content"]>(resp.contentType);
-      assertType<Response["content"][keyof Response["content"]]>(resp.data);
-    } else if (resp.status === 401) {
-      type Response = Route["responses"]["401"];
-      assertType<keyof Response["content"]>(resp.contentType);
-      assertType<Response["content"][keyof Response["content"]]>(resp.data);
-    } else if (resp.status === 403) {
-      type Response = Route["responses"]["403"];
-      assertType<keyof Response["content"]>(resp.contentType);
-      assertType<Response["content"][keyof Response["content"]]>(resp.data);
+    switch (resp.status) {
+      case 200: {
+        type Response = Route["responses"]["200"];
+        assertType<keyof Response["content"]>(resp.contentType);
+        assertType<Response["content"][keyof Response["content"]]>(resp.data);
+
+        break;
+      }
+      case 401: {
+        type Response = Route["responses"]["401"];
+        assertType<keyof Response["content"]>(resp.contentType);
+        assertType<Response["content"][keyof Response["content"]]>(resp.data);
+
+        break;
+      }
+      case 403: {
+        type Response = Route["responses"]["403"];
+        assertType<keyof Response["content"]>(resp.contentType);
+        assertType<Response["content"][keyof Response["content"]]>(resp.data);
+
+        break;
+      }
+    // No default
     }
   });
 
@@ -349,7 +365,8 @@ describe("Scalar Galaxy OpenAPI type tests", () => {
       type Response = Route["responses"]["400"];
       assertType<keyof Response["content"]>(resp.contentType);
       assertType<Response["content"][keyof Response["content"]]>(resp.data);
-    } else if (resp.status === 403) {
+    }
+    else if (resp.status === 403) {
       type Response = Route["responses"]["403"];
       assertType<keyof Response["content"]>(resp.contentType);
       assertType<Response["content"][keyof Response["content"]]>(resp.data);
